@@ -9,6 +9,8 @@
 #define GPIO_H_
 
 #include "stdint.h"
+#include <fsl_gpio.h>
+#include <fsl_port.h>
 
 #define EnablePortClock(MASK) ({SIM->SCGC5 |= MASK;})
 #define SetPin_GPIO(PORT,PIN) ({PORT->PCR[PIN] |= GPIO_MUX_MASK;})

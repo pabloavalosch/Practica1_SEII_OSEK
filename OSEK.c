@@ -14,7 +14,7 @@ struct{
 	task_t tasks[TOTAL_TASKS + 1];
 } task_list; //Initialize all struct variables in 0
 
-__attribute__((always_inline)) inline static void context_switch(task_switch_type type)
+__attribute__((always_inline)) inline static void context_switch(void)
 {
 	register uint32_t r0 asm("r0");
 	(void) r0;
@@ -24,7 +24,7 @@ __attribute__((always_inline)) inline static void context_switch(task_switch_typ
 	{
 		asm("mov r0, r7");
 		task_list.tasks[task_list.current_task].sp = (uint32_t *) r0;
-		if(kFromISR == type)
+		if(1)
 		{
 			task_list.tasks[task_list.current_task].sp -= -6;
 			if(task_list.tasks[task_list.current_task].state != WAITING)
@@ -45,12 +45,12 @@ __attribute__((always_inline)) inline static void context_switch(task_switch_typ
 	task_list.current_task = task_list.next_task;
 	task_list.tasks[task_list.current_task].state = RUNNING;
 	//Call the PENDSV
-	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+//	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 
 
 }
 
-static void dispatcher(task_switch_type type)
+static void dispatcher(void)
 {
 	task_list.next_task = task_list.nTasks; //Start in the last task
 
@@ -66,10 +66,6 @@ static void dispatcher(task_switch_type type)
 
 			task_list.next_task = i;
 		}
-	}
-	if(task_list.next_task != task_list.current_task)
-	{
-		context_switch(type);
 	}
 
 }
@@ -106,26 +102,23 @@ uint8_t task_create(task_t task){
 	return -1; //(Invalid task).
 }
 
-void activate_task(uint8_t task_id,task_switch_type task_type){ //TODO: Return ID task in function
+void activate_task(uint8_t task_id){ //TODO: Return ID task in function
 	// pone la tarea en ready
 
 	task_list.tasks[task_id].state = READY;
-	dispatcher(task_type);
 }
 
 
-void chain_task(uint8_t task_id,task_switch_type task_type){
+void chain_task(uint8_t task_id){
 	// termina la tarea actual y ejecuta otra tarea
 
 	task_list.tasks[task_list.current_task].state = SUSPENDED;
 	task_list.tasks[task_id].state = READY;
-	dispatcher(task_type);
 }
 
 
 void terminate_task(void){
 	task_list.tasks[task_list.current_task].state = SUSPENDED;
-	dispatcher(kFromNormalExec);
 }
 
 
@@ -133,13 +126,12 @@ void terminate_task(void){
 void scheduler(void){
 
 	for(uint8_t i = 0; i<MAX_TASKS;i++)
+	{
+		if(WAITING == task_list.tasks[i].state)
 		{
-			if(WAITING == task_list.tasks[i].state)
-			{
-				task_list.tasks[i].state = READY;
-			}
+			task_list.tasks[i].state = READY;
 		}
-	dispatcher(kFromNormalExec);
+	}
 
 }
 static void idle_function(void)
@@ -168,7 +160,7 @@ void PendSV_Handler(void)
 {
 	register int32_t r0 asm("r0");
 	(void) r0;
-	SCB->ICSR |= SCB_ICSR_PENDSVCLR_Msk;
+//	SCB->ICSR |= SCB_ICSR_PENDSVCLR_Msk;
 	r0 = (int32_t) task_list.tasks[task_list.current_task].sp;
 	asm("mov r7,r0");
 }
