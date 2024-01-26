@@ -11,7 +11,6 @@
 #include "stdint.h"
 
 
-#define TOTAL_TASKS					5
 #define MAX_TASKS					10U
 #define STACK_SIZE					100U
 #define STACK_FRAME_SIZE			8
@@ -35,7 +34,7 @@ typedef enum
 } autostart_e;
 
 typedef struct{
-	int8_t priority;
+	uint8_t priority;
 	autostart_e autostart;
 	void (*function)();	  // apuntador a inicio de la tarea
 	uint8_t task_id;
@@ -52,6 +51,7 @@ void chain_task(uint8_t task_id);
 void terminate_task(void);
 void os_init(void);
 
-uint8_t task_create(task_t task);
+uint8_t config_task(task_t task);
+void config_NUMBER_OF_TASKS_DEFINED(uint8_t number_of_tasks);
 
 #endif /* OSEK_H_ */

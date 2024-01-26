@@ -11,68 +11,75 @@ struct{
 	uint8_t nTasks;
 	uint8_t current_task;
 	uint8_t next_task;
-	task_t tasks[TOTAL_TASKS + 1];
+	task_t tasks[MAX_TASKS + 1];
 } task_list; //Initialize all struct variables in 0
 
-__attribute__((always_inline)) inline static void context_switch(void)
+//__attribute__((always_inline)) inline static void context_switch(void)
+//{
+//	register uint32_t r0 asm("r0");
+//	(void) r0;
+//	uint8_t static fist_time_here = 0;
+//
+//	if(fist_time_here)
+//	{
+//		asm("mov r0, r7");
+//		task_list.tasks[task_list.current_task].sp = (uint32_t *) r0;
+//		if(1)
+//		{
+//			task_list.tasks[task_list.current_task].sp -= -6;
+//			if(task_list.tasks[task_list.current_task].state != WAITING)
+//			{
+//				task_list.tasks[task_list.current_task].state = READY;
+//			}
+//		}
+//		else
+//		{
+//			task_list.tasks[task_list.current_task].sp -= STACKOFFSET; //9
+//		}
+//	}
+//	else
+//	{
+//		fist_time_here = 1;
+//	}
+//
+//	task_list.current_task = task_list.next_task;
+//	task_list.tasks[task_list.current_task].state = RUNNING;
+//	//Call the PENDSV
+////	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+//
+//
+//}
+
+//static void dispatcher(void)
+//{
+//	task_list.next_task = task_list.nTasks; //Start in the last task
+//
+//	int8_t max_priority = 0;
+//
+//	//task_list.tasks[task_list.current_task].priority
+//	for(uint8_t i = 0; i<task_list.nTasks ;i++)
+//	{
+//		if(task_list.tasks[i].priority >= max_priority &&
+//				(task_list.tasks[i].state == RUNNING || task_list.tasks[i].state == READY))
+//		{
+//			max_priority = task_list.tasks[i].priority;
+//
+//			task_list.next_task = i;
+//		}
+//	}
+//
+//}
+
+void config_NUMBER_OF_TASKS_DEFINED(uint8_t number_of_usr_tasks)
 {
-	register uint32_t r0 asm("r0");
-	(void) r0;
-	uint8_t static fist_time_here = 0;
-
-	if(fist_time_here)
-	{
-		asm("mov r0, r7");
-		task_list.tasks[task_list.current_task].sp = (uint32_t *) r0;
-		if(1)
-		{
-			task_list.tasks[task_list.current_task].sp -= -6;
-			if(task_list.tasks[task_list.current_task].state != WAITING)
-			{
-				task_list.tasks[task_list.current_task].state = READY;
-			}
-		}
-		else
-		{
-			task_list.tasks[task_list.current_task].sp -= STACKOFFSET; //9
-		}
-	}
-	else
-	{
-		fist_time_here = 1;
-	}
-
-	task_list.current_task = task_list.next_task;
-	task_list.tasks[task_list.current_task].state = RUNNING;
-	//Call the PENDSV
-//	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-
-
+	task_list.nTasks = number_of_usr_tasks;
 }
 
-static void dispatcher(void)
+uint8_t config_task(task_t task)
 {
-	task_list.next_task = task_list.nTasks; //Start in the last task
 
-	int8_t max_priority = 0;
-
-	//task_list.tasks[task_list.current_task].priority
-	for(uint8_t i = 0; i<task_list.nTasks ;i++)
-	{
-		if(task_list.tasks[i].priority >= max_priority &&
-				(task_list.tasks[i].state == RUNNING || task_list.tasks[i].state == READY))
-		{
-			max_priority = task_list.tasks[i].priority;
-
-			task_list.next_task = i;
-		}
-	}
-
-}
-
-uint8_t task_create(task_t task){
 	if (MAX_TASKS > task_list.nTasks)
-	  {
+	{
 
 		if (task.autostart == kAutoStart)
 		{
@@ -97,7 +104,7 @@ uint8_t task_create(task_t task){
 		task_list.nTasks ++;
 
 		return (task_list.nTasks-1);
-		}
+	}
 
 	return -1; //(Invalid task).
 }
@@ -125,7 +132,7 @@ void terminate_task(void){
 
 void scheduler(void){
 
-	for(uint8_t i = 0; i<MAX_TASKS;i++)
+	for(uint8_t i = 0; i < MAX_TASKS;i++)
 	{
 		if(WAITING == task_list.tasks[i].state)
 		{
@@ -141,15 +148,16 @@ static void idle_function(void)
 
 void os_init(void){
 
-	task_list.next_task = 0;
-	task_list.current_task = -1;
+	task_list.next_task = 1;
+	task_list.current_task = 0;
 
 	task_t idle_task = {
 				.autostart = kAutoStart,
-				.priority = -1,
+				.priority = 0,
 				.function = idle_function,
 		};
-	task_create(idle_task);
+
+	config_task(idle_task);
 
 	scheduler();
 

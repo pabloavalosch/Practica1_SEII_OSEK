@@ -78,4 +78,5 @@ void define_Tasks(void)
 			.function = task_C_function,
 	};
 
+	config_NUMBER_OF_TASKS_DEFINED( NUMBER_OF_USR_TASKS );
 }

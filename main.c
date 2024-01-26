@@ -8,11 +8,14 @@
 #include <stdio.h>
 #include "leds.h"
 #include "NVIC.h"
+#include "USER_APP.h"
 
 
 
 int main(void)
 {
+	os_init();
+	define_Tasks();
 
 
     while(1)
