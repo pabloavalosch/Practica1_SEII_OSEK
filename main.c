@@ -14,8 +14,9 @@
 
 int main(void)
 {
-	os_init();
+
 	define_Tasks();
+	os_init();
 
 
     while(1)

@@ -13,12 +13,11 @@
 
 #define MAX_TASKS					10U
 #define STACK_SIZE					100U
-#define STACK_FRAME_SIZE			8
-#define STACK_LR_OFFSET				2
-#define STACK_PSR_OFFSET			1
-#define STACK_PSR_DEFAULT			0x01000000
-#define STACKOFFSET 				9
 
+typedef enum{
+	kStatusSuccess,
+	kStatusError
+}status_e;
 
 typedef enum{
 	READY,
@@ -31,7 +30,7 @@ typedef enum
 {
 	kAutoStart,
 	kStartSuspended
-} autostart_e;
+}autostart_e;
 
 typedef struct{
 	uint8_t priority;

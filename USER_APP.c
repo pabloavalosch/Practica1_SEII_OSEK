@@ -79,4 +79,8 @@ void define_Tasks(void)
 	};
 
 	config_NUMBER_OF_TASKS_DEFINED( NUMBER_OF_USR_TASKS );
+	config_task(task_A);
+	config_task(task_B);
+	config_task(task_C);
+
 }

@@ -92,21 +92,14 @@ uint8_t config_task(task_t task)
 			task_list.tasks[task_list.nTasks].priority = task.priority;
 		}
 
-		//Inicializa el stack pointer de la tarea apuntando al final del stack de la tarea, tomando en cuenta el stack frame inicial.
-		task_list.tasks[task_list.nTasks].sp = task_list.tasks[task_list.nTasks].stack-STACK_FRAME_SIZE+STACK_SIZE-1;
-
-		//Inicializa el stack frame inicial, con la dirección de retorno en el cuerpo de la tarea y el PSR en el valor por defecto.
-		task_list.tasks[task_list.nTasks].function = task.function;
-		task_list.tasks[task_list.nTasks].stack[STACK_SIZE-STACK_PSR_OFFSET-1] = (uint32_t)task.function;
-		task_list.tasks[task_list.nTasks].stack[STACK_SIZE-STACK_PSR_OFFSET] = STACK_PSR_DEFAULT;
+		//Inicializa el stack pointer de la estructura del S.O. para apuntar a la tarea configurandose
+		task_list.tasks[task_list.nTasks].sp = task_list.tasks[task_list.nTasks].stack;
 
 
-		task_list.nTasks ++;
-
-		return (task_list.nTasks-1);
+		return kStatusSuccess;
 	}
 
-	return -1; //(Invalid task).
+	return kStatusError; //(Invalid task).
 }
 
 void activate_task(uint8_t task_id){ //TODO: Return ID task in function
