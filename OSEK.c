@@ -14,41 +14,6 @@ struct{
 	task_t tasks[MAX_TASKS + 1];
 } task_list; //Initialize all struct variables in 0
 
-//__attribute__((always_inline)) inline static void context_switch(void)
-//{
-//	register uint32_t r0 asm("r0");
-//	(void) r0;
-//	uint8_t static fist_time_here = 0;
-//
-//	if(fist_time_here)
-//	{
-//		asm("mov r0, r7");
-//		task_list.tasks[task_list.current_task].sp = (uint32_t *) r0;
-//		if(1)
-//		{
-//			task_list.tasks[task_list.current_task].sp -= -6;
-//			if(task_list.tasks[task_list.current_task].state != WAITING)
-//			{
-//				task_list.tasks[task_list.current_task].state = READY;
-//			}
-//		}
-//		else
-//		{
-//			task_list.tasks[task_list.current_task].sp -= STACKOFFSET; //9
-//		}
-//	}
-//	else
-//	{
-//		fist_time_here = 1;
-//	}
-//
-//	task_list.current_task = task_list.next_task;
-//	task_list.tasks[task_list.current_task].state = RUNNING;
-//	//Call the PENDSV
-////	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-//
-//
-//}
 
 //static void dispatcher(void)
 //{
@@ -77,23 +42,24 @@ void config_NUMBER_OF_TASKS_DEFINED(uint8_t number_of_usr_tasks)
 
 uint8_t config_task(task_t task)
 {
+	static uint8_t i = 0; // Variable to count each time a task is configured
 
 	if (MAX_TASKS > task_list.nTasks)
 	{
-
+		i++;
 		if (task.autostart == kAutoStart)
 		{
-			task_list.tasks[task_list.nTasks].state = READY;
-			task_list.tasks[task_list.nTasks].priority = task.priority;
+			task_list.tasks[i].state = READY;
+			task_list.tasks[i].priority = task.priority;
 		}
 		else
 		{
-			task_list.tasks[task_list.nTasks].state = SUSPENDED;
-			task_list.tasks[task_list.nTasks].priority = task.priority;
+			task_list.tasks[i].state = SUSPENDED;
+			task_list.tasks[i].priority = task.priority;
 		}
 
 		//Inicializa el stack pointer de la estructura del S.O. para apuntar a la tarea configurandose
-		task_list.tasks[task_list.nTasks].sp = task_list.tasks[task_list.nTasks].stack;
+		task_list.tasks[i].sp = task_list.tasks[i].stack;
 
 
 		return kStatusSuccess;
