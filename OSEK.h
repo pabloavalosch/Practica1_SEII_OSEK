@@ -13,6 +13,7 @@
 
 #define MAX_TASKS					10U
 #define STACK_SIZE					100U
+#define STACK_FRAME_SIZE			8
 
 typedef enum{
 	kStatusSuccess,

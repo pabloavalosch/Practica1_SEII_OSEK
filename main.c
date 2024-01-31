@@ -16,6 +16,7 @@ int main(void)
 {
 
 	define_Tasks();
+	GPIO_init();
 	os_init();
 
 

@@ -15,26 +15,6 @@ struct{
 } task_list; //Initialize all struct variables in 0
 
 
-//static void dispatcher(void)
-//{
-//	task_list.next_task = task_list.nTasks; //Start in the last task
-//
-//	int8_t max_priority = 0;
-//
-//	//task_list.tasks[task_list.current_task].priority
-//	for(uint8_t i = 0; i<task_list.nTasks ;i++)
-//	{
-//		if(task_list.tasks[i].priority >= max_priority &&
-//				(task_list.tasks[i].state == RUNNING || task_list.tasks[i].state == READY))
-//		{
-//			max_priority = task_list.tasks[i].priority;
-//
-//			task_list.next_task = i;
-//		}
-//	}
-//
-//}
-
 void config_NUMBER_OF_TASKS_DEFINED(uint8_t number_of_usr_tasks)
 {
 	task_list.nTasks = number_of_usr_tasks;
@@ -47,10 +27,11 @@ uint8_t config_task(task_t task)
 	if (MAX_TASKS > task_list.nTasks)
 	{
 		i++;
-		if (task.autostart == kAutoStart)
+		if (kAutoStart == task.autostart)
 		{
 			task_list.tasks[i].state = READY;
 			task_list.tasks[i].priority = task.priority;
+
 		}
 		else
 		{
@@ -58,9 +39,9 @@ uint8_t config_task(task_t task)
 			task_list.tasks[i].priority = task.priority;
 		}
 
-		//Inicializa el stack pointer de la estructura del S.O. para apuntar a la tarea configurandose
-		task_list.tasks[i].sp = task_list.tasks[i].stack;
-
+		//Inicializa el stack pointer de la tarea apuntando al final del stack de la tarea, tomando en cuenta el stack frame inicial.
+		task_list.tasks[i].sp = task_list.tasks[i].stack-STACK_FRAME_SIZE+STACK_SIZE-1;
+		task_list.tasks[i].function = (uint32_t)task.function;
 
 		return kStatusSuccess;
 	}
@@ -89,15 +70,33 @@ void terminate_task(void){
 
 
 
-void scheduler(void){
+void scheduler(void)
+{
+	static uint32_t * src;
 
-	for(uint8_t i = 0; i < MAX_TASKS;i++)
+	uint8_t max_priority = 0;
+
+	for(uint8_t i = 0; i < task_list.nTasks ;i++)
 	{
-		if(WAITING == task_list.tasks[i].state)
+		if(task_list.tasks[i].priority >= max_priority &&
+				(task_list.tasks[i].state == RUNNING || task_list.tasks[i].state == READY))
 		{
-			task_list.tasks[i].state = READY;
+			max_priority = task_list.tasks[i].priority;
+
+			task_list.next_task = i;
 		}
 	}
+
+
+
+	task_list.current_task = task_list.next_task;
+	task_list.tasks[task_list.current_task].state = RUNNING;
+
+	src = task_list.tasks[task_list.current_task].sp;
+
+	asm(	"MOV R0, SP"	);
+	asm(	"MOV R1, PC"	);
+	asm(	"LDR R0, [R1]"	);
 
 }
 static void idle_function(void)
@@ -121,13 +120,4 @@ void os_init(void){
 	scheduler();
 
 
-}
-
-void PendSV_Handler(void)
-{
-	register int32_t r0 asm("r0");
-	(void) r0;
-//	SCB->ICSR |= SCB_ICSR_PENDSVCLR_Msk;
-	r0 = (int32_t) task_list.tasks[task_list.current_task].sp;
-	asm("mov r7,r0");
 }
