@@ -35,12 +35,14 @@ uint8_t config_task(task_t task)
 		i++;
 		if (kAutoStart == task.autostart)
 		{
+			task_list.tasks[i].autostart = kAutoStart;
 			task_list.tasks[i].state = READY;
 			task_list.tasks[i].priority = task.priority;
 
 		}
 		else
 		{
+			task_list.tasks[i].autostart = kStartSuspended;
 			task_list.tasks[i].state = SUSPENDED;
 			task_list.tasks[i].priority = task.priority;
 		}
@@ -63,10 +65,11 @@ void activate_task(uint8_t task_id){ //TODO: Return ID task in function
 	asm(	"SUB R1, R1, #1");
 	asm(	"STR R1, [R0]");
 
+
+	task_list.tasks[task_list.next_task].return_addr = g_return_addr;
 	task_list.tasks[task_list.next_task].state = READY; //task which called this function change from running to ready
 	task_list.tasks[task_id].state = READY;
 	scheduler();
-
 }
 
 
@@ -91,7 +94,7 @@ void scheduler(void)
 
 	uint8_t max_priority = 0;
 
-	for(uint8_t i = 0; i < task_list.nTasks ;i++)
+	for(uint8_t i = 0; i <= task_list.nTasks ;i++)
 	{
 		if(task_list.tasks[i].priority >= max_priority &&
 				 task_list.tasks[i].state == READY)
@@ -106,13 +109,22 @@ void scheduler(void)
 	{
 		task_list.tasks[task_list.next_task].state = RUNNING;
 
-		g_src = (uint32_t)(task_list.tasks[task_list.next_task].function + ADJUST_ADDRESS);
+		if(0 != task_list.tasks[task_list.next_task].return_addr)
+		{
 
+			g_src = (uint32_t)(task_list.tasks[task_list.next_task].return_addr);
+
+		}
+		else
+		{
+			g_src = (uint32_t)(task_list.tasks[task_list.next_task].function + ADJUST_ADDRESS);
+		}
 
 		asm(	"LDR R0, =g_src");
 		asm(	"LDR R1, [R0]"	);
 		asm(	"MOV PC, R1"	);
 	}
+
 	else
 	{
 		while(1);

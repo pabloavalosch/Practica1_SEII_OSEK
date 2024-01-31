@@ -41,6 +41,7 @@ typedef struct{
 	uint32_t *sp;
 	task_state_t state;
 	uint32_t stack[STACK_SIZE];
+	uint32_t return_addr;
 }task_t;
 
 
