@@ -2,7 +2,7 @@
  * GPIO.c
  *
  *  Created on: 4 oct 2023
- *      Author: pablo
+ *      Author: PABLO AVALOS AND JORGE LEAUTUD.
  */
 
 #include <GPIO.h>

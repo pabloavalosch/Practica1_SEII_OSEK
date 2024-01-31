@@ -2,7 +2,7 @@
  * USER_APP.c
  *
  *  Created on: 19 ene. 2024
- *      Author: pablo
+ *      Author: PABLO AVALOS AND JORGE LEAUTUD.
  */
 
 #include "leds.h"

@@ -2,7 +2,7 @@
  * NVIC.h
  *
  *  Created on: 3 sep. 2023
- *      Author: pablo
+ *      Author: PABLO AVALOS AND JORGE LEAUTUD.
  */
 
 #ifndef NVIC_H_

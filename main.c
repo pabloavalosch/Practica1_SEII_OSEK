@@ -1,6 +1,7 @@
 /*
  * @file    main.c
- * @brief   This main file is to test the OSEK example code developed by Pablo Avalos.
+ * @brief   This main file is to test the OSEK example code developed by
+ * 			PABLO AVALOS AND JORGE LEAUTUD.
  */
 
 #include <GPIO.h>

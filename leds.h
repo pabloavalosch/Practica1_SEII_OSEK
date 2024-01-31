@@ -2,7 +2,7 @@
  * leds.h
  *
  *  Created on: 8 oct 2023
- *      Author: pablo
+ *      Author: PABLO AVALOS AND JORGE LEAUTUD.
  */
 
 #ifndef LEDS_H_

@@ -2,7 +2,7 @@
  * OSEK.c
  *
  *  Created on: 23 sep. 2023
- *      Author: pablo
+ *      Author: PABLO AVALOS AND JORGE LEAUTUD.
  */
 
 #ifndef OSEK_H_
