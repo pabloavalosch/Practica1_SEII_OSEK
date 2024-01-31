@@ -5,7 +5,7 @@
 		It contains some configuration functions and runtime functions.
 		It is implemented using  CMSIS Core functions
     \Created on: 3 sep. 2023
-        Author: PABLO AVALOS AND JORGE LEAUTUD.
+        Author: PABLO AVALOS AND JORGE LEAUTAUD.
 	\todo
 	    Pending interrupts and disable interrupts are not enable.
  */

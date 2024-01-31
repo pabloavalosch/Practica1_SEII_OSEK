@@ -2,7 +2,7 @@
  * GPIO.h
  *
  *  Created on: 4 oct 2023
- *      Author: PABLO AVALOS AND JORGE LEAUTUD.
+ *      Author: PABLO AVALOS AND JORGE LEAUTAUD.
  */
 
 #ifndef GPIO_H_

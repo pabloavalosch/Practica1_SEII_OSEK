@@ -2,10 +2,16 @@
  * OSEK.c
  *
  *  Created on: 23 sep. 2023
- *      Author: PABLO AVALOS AND JORGE LEAUTUD.
+ *      Author: PABLO AVALOS AND JORGE LEAUTAUD.
  */
 
 #include <OSEK.h>
+
+
+#define ADJUST_ADDRESS (-1 + 4)
+
+uint32_t g_src = 0; //global address of each task
+uint32_t g_return_addr  = 0; //variable to store the return address on link register
 
 struct{
 	uint8_t nTasks;
@@ -39,8 +45,7 @@ uint8_t config_task(task_t task)
 			task_list.tasks[i].priority = task.priority;
 		}
 
-		//Inicializa el stack pointer de la tarea apuntando al final del stack de la tarea, tomando en cuenta el stack frame inicial.
-		task_list.tasks[i].sp = task_list.tasks[i].stack-STACK_FRAME_SIZE+STACK_SIZE-1;
+
 		task_list.tasks[i].function = (uint32_t)task.function;
 
 		return kStatusSuccess;
@@ -50,36 +55,46 @@ uint8_t config_task(task_t task)
 }
 
 void activate_task(uint8_t task_id){ //TODO: Return ID task in function
-	// pone la tarea en ready
 
+
+
+	asm(	"LDR R0, =g_return_addr");
+	asm(	"MOV R1, LR"	);
+	asm(	"SUB R1, R1, #1");
+	asm(	"STR R1, [R0]");
+
+	task_list.tasks[task_list.next_task].state = READY; //task which called this function change from running to ready
 	task_list.tasks[task_id].state = READY;
+	scheduler();
+
 }
 
 
 void chain_task(uint8_t task_id){
 	// termina la tarea actual y ejecuta otra tarea
 
-	task_list.tasks[task_list.current_task].state = SUSPENDED;
+	task_list.tasks[task_list.next_task].state = SUSPENDED;
 	task_list.tasks[task_id].state = READY;
+	scheduler();
 }
 
 
 void terminate_task(void){
-	task_list.tasks[task_list.current_task].state = SUSPENDED;
+	task_list.tasks[task_list.next_task].state = SUSPENDED;
+	scheduler();
 }
 
 
 
 void scheduler(void)
 {
-	static uint32_t * src;
 
 	uint8_t max_priority = 0;
 
 	for(uint8_t i = 0; i < task_list.nTasks ;i++)
 	{
 		if(task_list.tasks[i].priority >= max_priority &&
-				(task_list.tasks[i].state == RUNNING || task_list.tasks[i].state == READY))
+				 task_list.tasks[i].state == READY)
 		{
 			max_priority = task_list.tasks[i].priority;
 
@@ -87,35 +102,28 @@ void scheduler(void)
 		}
 	}
 
+	if( 0 != task_list.next_task)
+	{
+		task_list.tasks[task_list.next_task].state = RUNNING;
+
+		g_src = (uint32_t)(task_list.tasks[task_list.next_task].function + ADJUST_ADDRESS);
 
 
-	task_list.current_task = task_list.next_task;
-	task_list.tasks[task_list.current_task].state = RUNNING;
-
-	src = task_list.tasks[task_list.current_task].sp;
-
-	asm(	"MOV R0, SP"	);
-	asm(	"MOV R1, PC"	);
-	asm(	"LDR R0, [R1]"	);
-
-}
-static void idle_function(void)
-{
-	while(1);
+		asm(	"LDR R0, =g_src");
+		asm(	"LDR R1, [R0]"	);
+		asm(	"MOV PC, R1"	);
+	}
+	else
+	{
+		while(1);
+	}
 }
 
 void os_init(void){
 
-	task_list.next_task = 1;
+	task_list.next_task = 0;
 	task_list.current_task = 0;
 
-	task_t idle_task = {
-				.autostart = kAutoStart,
-				.priority = 0,
-				.function = idle_function,
-		};
-
-	config_task(idle_task);
 
 	scheduler();
 

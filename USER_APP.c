@@ -2,7 +2,7 @@
  * USER_APP.c
  *
  *  Created on: 19 ene. 2024
- *      Author: PABLO AVALOS AND JORGE LEAUTUD.
+ *      Author: PABLO AVALOS AND JORGE LEAUTAUD.
  */
 
 #include "leds.h"
@@ -16,7 +16,7 @@
 
 enum
 {
-	g_task_A_ID,
+	g_task_A_ID = 1,
 	g_task_B_ID,
 	g_task_C_ID
 };

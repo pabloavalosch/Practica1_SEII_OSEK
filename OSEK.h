@@ -2,7 +2,7 @@
  * OSEK.c
  *
  *  Created on: 23 sep. 2023
- *      Author: PABLO AVALOS AND JORGE LEAUTUD.
+ *      Author: PABLO AVALOS AND JORGE LEAUTAUD.
  */
 
 #ifndef OSEK_H_
@@ -50,6 +50,7 @@ void activate_task(uint8_t task_id);
 void chain_task(uint8_t task_id);
 void terminate_task(void);
 void os_init(void);
+void scheduler(void);
 
 uint8_t config_task(task_t task);
 void config_NUMBER_OF_TASKS_DEFINED(uint8_t number_of_tasks);
